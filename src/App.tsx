@@ -1,30 +1,46 @@
-import React from 'react';
+import React, {useState, } from 'react';
 import logo from './logo.svg';
 import Hello from './components/Hello';
 import LikeButtom  from './components/LikeButtom';
 import MouseTracker from './components/MouseTracker';
+import useUrlLoader from './hooks/useUrlLoader';
 import './App.css';
+interface Ishow{
+  message: string;
+  status: string;
+}
+interface IThemeProps {
+  [key : string] : {color: string, background: string}
+}
+const themes : IThemeProps = {
+  light: {
+    color: '#000',
+    background: '#eee'
+  },
+  dark: {
+    color: '#fff',
+    background: '#222'
+  }
+}
 
+export const ThemeContext = React.createContext(themes.light)
 function App() {
+  const [show, setShow] = useState(true);
+  const [data, loading] = useUrlLoader('https://dog.ceo/api/breeds/image/random', [show]);
+  const data_result = data as Ishow;
   return (
     <div className="App">
+      <ThemeContext.Provider value={themes.dark}>
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
+        {loading ? <p>🐕正在加载中</p>: <img src={data_result && data_result.message}></img>}
         <Hello message="Hello World"/>
-        <MouseTracker/>
+        <button onClick={()=>{setShow(!show)}}>Tracker taggle</button>
+        {/* { show && <MouseTracker/>} */}
         <LikeButtom/>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        
       </header>
+      </ThemeContext.Provider>
     </div>
   );
 }
